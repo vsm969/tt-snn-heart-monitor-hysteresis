@@ -6,7 +6,14 @@ SIM ?= icarus
 FST ?= -fst # Use more efficient FST format
 TOPLEVEL_LANG ?= verilog
 SRC_DIR = $(PWD)/../src
-PROJECT_SOURCES = project.v
+PROJECT_SOURCES = project.v \
+                  SNN_Heart_Monitor_Top.v \
+                  Decision_Engine.v \
+                  Delta_Encoder.v \
+                  Heartbeat_Segmenter.v \
+                  Heart_Monitor_Neuron.v \
+                  MultiClass_SNN_Voter.v \
+                  Parallel_SNN_Matrix.v
 
 ifneq ($(GATES),yes)
 
