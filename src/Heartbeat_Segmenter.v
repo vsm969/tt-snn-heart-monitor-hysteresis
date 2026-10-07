@@ -27,8 +27,10 @@ module Heartbeat_Segmenter #(
     output reg                   window_end
 );
 
+/* verilator lint_off WIDTHTRUNC */
     localparam [7:0] EVAL_CYCLES = (SAMPLE_RATE_HZ * EVAL_WINDOW_MS) / 1000;
     localparam [7:0] REFR_CYCLES = (SAMPLE_RATE_HZ * REFRACTORY_MS) / 1000;
+/* verilator lint_on WIDTHTRUNC */
 
     localparam SEARCH     = 2'b00;
     localparam EVALUATE   = 2'b01;
