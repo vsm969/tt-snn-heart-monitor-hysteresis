@@ -70,11 +70,11 @@ module MultiClass_SNN_Voter #(
                 assigned_class <= best_class;
         end else begin
             // Uso directo de input_spikes (cada uno es 1 bit)
-            count_N <= count_N + input_spikes[0];
-            count_S <= count_S + input_spikes[1];
-            count_V <= count_V + input_spikes[2];
-            count_F <= count_F + input_spikes[3];
-            count_Q <= count_Q + input_spikes[4];
+            count_N <= count_N + {7'b0, input_spikes[0]};
+            count_S <= count_S + {7'b0, input_spikes[1]};
+            count_V <= count_V + {7'b0, input_spikes[2]};
+            count_F <= count_F + {7'b0, input_spikes[3]};
+            count_Q <= count_Q + {7'b0, input_spikes[4]};
             valid_out <= 0;
         end
     end
