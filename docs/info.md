@@ -54,16 +54,12 @@ cd test
 make
 ```
 
-
 The testbench exercises:
 
-Reset behavior — verifies alarm and pattern outputs are 0 after reset.
+1. **Reset behavior** — verifies alarm and pattern outputs are 0 after reset.
+2. **Hysteresis** — uses `force_class` to inject 3 consecutive Ventricular classifications, verifies the alarm activates, then injects a Normal beat and verifies the alarm clears.
+3. **Calibration mode** — verifies the calibration path does not break the DUT.
 
-Stability — sends arbitrary samples and checks the DUT does not lock.
-
-Calibration mode — verifies the calibration path does not break the DUT.
-
-Hysteresis — uses force_class to inject 3 consecutive Ventricular classifications, verifies the alarm activates, then injects a Normal beat and verifies the alarm clears.
 
 Manual testing
 To test with real hardware:

@@ -4,7 +4,7 @@ A Tiny Tapeout project that classifies heartbeats using a Spiking Neural Network
 
 [![Tiny Tapeout](https://img.shields.io/badge/Tiny%20Tapeout-ready-blue)](https://tinytapeout.com)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
-[![Tests](https://img.shields.io/badge/tests-4%2F4%20passing-green)](test/)
+[![Tests](https://img.shields.io/badge/tests-3%2F3%20passing-green)](test/)
 
 ---
 
@@ -126,14 +126,15 @@ pip install cocotb
 cd test
 make
 
-Four tests must pass:
+Three tests must pass:
 
-Test	What it verifies
-test_reset_state	After reset, alarm and pattern detectors are 0
-test_wiring_stability	The design does not crash on 10 arbitrary samples
-test_mode_sel_does_not_break	Calibration mode does not break the DUT
-test_forced_class_hysteresis	Core logic: 3 consecutive anomalies activate the alarm; a Normal beat clears it
-The fourth test uses the force_class mode to bypass the SNN and inject specific classes, allowing direct verification of the Decision_Engine.
+| Test | What it verifies |
+|---|---|
+| `test_reset_state` | After reset, the alarm and pattern detectors are 0 |
+| `test_hysteresis_3_anomalies` | **Core logic**: 3 consecutive anomalies activate the alarm; a Normal beat clears it |
+| `test_calibration_mode` | Calibration mode does not break the DUT |
+
+The second test uses the `force_class` mode to bypass the SNN and inject specific classes, allowing direct verification of the `Decision_Engine`.
 
 📁 Project structure
 
@@ -151,7 +152,7 @@ tt-snn-heart-monitor-hysteresis/
 ├── test/                         # cocotb testbench
 │   ├── test.py
 │   ├── tb.v
-│   └── Makefile
+│   └── Makefilem
 ├── docs/
 │   ├── info.md                   # Datasheet
 │   ├── arquitectura.md           # Extended architecture documentation
