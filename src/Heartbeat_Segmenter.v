@@ -3,13 +3,16 @@
  * SPDX-License-Identifier: Apache-2.0
  *
  * Heartbeat_Segmenter.v - Window controller state machine
+ *
+ * Optimizacion de area (2026):
+ *   - cycle_counter reducido de 16 a 8 bits.
+ *   - Anadido puerto threshold_in (12 bits) para calibracion adaptativa.
  */
 
 `default_nettype none
 
 module Heartbeat_Segmenter #(
     parameter DATA_WIDTH       = 12,
-    parameter R_PEAK_THRESHOLD = 12'd2200,
     parameter SAMPLE_RATE_HZ   = 500,
     parameter EVAL_WINDOW_MS   = 200,
     parameter REFRACTORY_MS    = 300
@@ -18,6 +21,7 @@ module Heartbeat_Segmenter #(
     input  wire                  rst,
     input  wire                  sample_en,
     input  wire [DATA_WIDTH-1:0] data_in,
+    input  wire [11:0]           threshold_in,   // NUEVO: umbral dinamico
 
     output reg                   window_start,
     output reg                   window_end
@@ -31,12 +35,12 @@ module Heartbeat_Segmenter #(
     localparam REFRACTORY = 2'b10;
     reg [1:0] state;
 
-    reg [15:0] cycle_counter;
+    reg [7:0] cycle_counter;
 
     always @(posedge clk) begin
         if (rst) begin
             state         <= SEARCH;
-            cycle_counter <= 16'd0;
+            cycle_counter <= 8'd0;
             window_start  <= 1'b0;
             window_end    <= 1'b0;
         end else if (sample_en) begin
@@ -45,9 +49,9 @@ module Heartbeat_Segmenter #(
 
             case (state)
                 SEARCH: begin
-                    if (data_in >= R_PEAK_THRESHOLD) begin
+                    if (data_in >= threshold_in) begin
                         window_start  <= 1'b1;
-                        cycle_counter <= 16'd0;
+                        cycle_counter <= 8'd0;
                         state         <= EVALUATE;
                     end
                 end
@@ -55,7 +59,7 @@ module Heartbeat_Segmenter #(
                 EVALUATE: begin
                     if (cycle_counter >= (EVAL_CYCLES - 1)) begin
                         window_end    <= 1'b1;
-                        cycle_counter <= 16'd0;
+                        cycle_counter <= 8'd0;
                         state         <= REFRACTORY;
                     end else begin
                         cycle_counter <= cycle_counter + 1'b1;

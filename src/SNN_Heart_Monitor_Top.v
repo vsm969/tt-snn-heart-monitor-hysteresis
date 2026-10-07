@@ -3,13 +3,18 @@
  * SPDX-License-Identifier: Apache-2.0
  *
  * SNN_Heart_Monitor_Top.v - Heart-monitor SNN core (Tiny Tapeout sized)
+ *
+ * Optimizacion de area (2026):
+ *   - BIT_WIDTH propagado reducido a 8.
+ *   - consecutive_anomaly_counter reducido de 8 a 3 bits.
+ *   - Anadido puerto threshold_in para calibracion.
  */
 
 `default_nettype none
 
 module SNN_Heart_Monitor_Top #(
     parameter DATA_WIDTH        = 12,
-    parameter BIT_WIDTH         = 16,
+    parameter BIT_WIDTH         = 8,
     parameter NUM_NEURONS       = 5,
     parameter R_PEAK_THRESHOLD  = 12'd2200,
     parameter DELTA_THRESHOLD   = 12'd15,
@@ -18,12 +23,13 @@ module SNN_Heart_Monitor_Top #(
     parameter EVAL_WINDOW_MS    = 200,
     parameter REFRACTORY_MS     = 300,
     parameter ALARM_PERSIST_MAX = 3,
-    parameter WIN_MARGIN        = 16'd8
+    parameter WIN_MARGIN        = 8'd8
 )(
     input  wire                  clk,
     input  wire                  rst,
     input  wire                  sample_en,
     input  wire [DATA_WIDTH-1:0] adc_data_in,
+    input  wire [11:0]           threshold_in,   // NUEVO
 
     output wire [2:0]            heart_class_out,
     output wire                  diagnostic_valid,
@@ -45,11 +51,12 @@ module SNN_Heart_Monitor_Top #(
     end
 
     Heartbeat_Segmenter #(
-        .DATA_WIDTH(DATA_WIDTH), .R_PEAK_THRESHOLD(R_PEAK_THRESHOLD),
+        .DATA_WIDTH(DATA_WIDTH),
         .SAMPLE_RATE_HZ(SAMPLE_RATE_HZ), .EVAL_WINDOW_MS(EVAL_WINDOW_MS),
         .REFRACTORY_MS(REFRACTORY_MS)
     ) segmenter_inst (
         .clk(clk), .rst(rst), .sample_en(sample_en), .data_in(adc_data_in),
+        .threshold_in(threshold_in),
         .window_start(window_start), .window_end(window_end)
     );
 
@@ -68,7 +75,7 @@ module SNN_Heart_Monitor_Top #(
 
     Parallel_SNN_Matrix #(
         .NUM_NEURONS(NUM_NEURONS), .BIT_WIDTH(BIT_WIDTH),
-        .THRESHOLD(16'h0800)
+        .THRESHOLD(8'h80)
     ) processing_matrix_inst (
         .clk(clk), .rst(rst),
         .clear(window_start),
@@ -90,21 +97,22 @@ module SNN_Heart_Monitor_Top #(
         .valid_out(diagnostic_valid)
     );
 
-    reg [7:0] consecutive_anomaly_counter;
+    // Contador reducido a 3 bits (max valor ALARM_PERSIST_MAX = 3)
+    reg [2:0] consecutive_anomaly_counter;
     always @(posedge clk) begin
         if (rst) begin
-            consecutive_anomaly_counter <= 8'd0;
+            consecutive_anomaly_counter <= 3'd0;
             alarm_strobe                <= 1'b0;
         end else if (diagnostic_valid) begin
             if (heart_class_out == 3'd1 || heart_class_out == 3'd2 || heart_class_out == 3'd4) begin
-                if (consecutive_anomaly_counter < ALARM_PERSIST_MAX) begin
+                if (consecutive_anomaly_counter < ALARM_PERSIST_MAX[2:0]) begin
                     consecutive_anomaly_counter <= consecutive_anomaly_counter + 1'b1;
                 end
-                if ((consecutive_anomaly_counter + 1'b1) >= ALARM_PERSIST_MAX) begin
+                if ((consecutive_anomaly_counter + 1'b1) >= ALARM_PERSIST_MAX[2:0]) begin
                     alarm_strobe <= 1'b1;
                 end
             end else begin
-                consecutive_anomaly_counter <= 8'd0;
+                consecutive_anomaly_counter <= 3'd0;
                 alarm_strobe                <= 1'b0;
             end
         end

@@ -3,13 +3,17 @@
  * SPDX-License-Identifier: Apache-2.0
  *
  * Heart_Monitor_Neuron.v - LIF with dynamic leak and window clear
+ *
+ * Optimizacion de area (2026): BIT_WIDTH reducido de 16 a 8.
+ * Los pesos y el umbral estan pre-escalados por 1/16, manteniendo
+ * el comportamiento funcional identico.
  */
 
 `default_nettype none
 
 module Heart_Monitor_Neuron #(
-    parameter BIT_WIDTH = 16,
-    parameter THRESHOLD = 16'h0800
+    parameter BIT_WIDTH = 8,
+    parameter THRESHOLD = 8'h80      // 128 (antes 0x0800/16)
 )(
     input  wire                   clk,
     input  wire                   rst,

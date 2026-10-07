@@ -4,15 +4,17 @@
  *
  * Parallel_SNN_Matrix.v - Class-specialized banded rate coding
  * Default NUM_NEURONS=5 (one neuron per AAMI class) for Tiny Tapeout area.
+ *
+ * Optimizacion de area (2026): BIT_WIDTH reducido a 8, pesos escalados 1/16.
  */
 
 `default_nettype none
 
 module Parallel_SNN_Matrix #(
     parameter NUM_NEURONS = 5,
-    parameter BIT_WIDTH   = 16,
-    parameter THRESHOLD   = 16'h0800,
-    parameter LEAK        = 16'h0000
+    parameter BIT_WIDTH   = 8,
+    parameter THRESHOLD   = 8'h80,   // 128 (antes 0x0800/16)
+    parameter LEAK        = 8'h00
 )(
     input  wire                   clk,
     input  wire                   rst,
@@ -42,42 +44,43 @@ module Parallel_SNN_Matrix #(
     generate
         for (i = 0; i < NUM_NEURONS; i = i + 1) begin : config_loop
 
+            // Pesos escalados por 1/16 respecto al diseno original
             case (i % 5)
                 0: begin
                     assign map_spike_up[i]   = spike_up_gentle;
                     assign map_spike_down[i] = spike_down_gentle | spike_up_steep | spike_down_steep | spike_flip;
-                    assign weights_exc[i]    = 16'h0300;
-                    assign weights_inh[i]    = 16'h0400;
-                    assign leak_val[i]       = 16'h0010;
+                    assign weights_exc[i]    = 8'h30;   // 0x0300 / 16
+                    assign weights_inh[i]    = 8'h40;   // 0x0400 / 16
+                    assign leak_val[i]       = 8'h01;   // 0x0010 / 16
                 end
                 1: begin
                     assign map_spike_up[i]   = spike_down_gentle;
                     assign map_spike_down[i] = spike_up_gentle | spike_up_steep | spike_down_steep | spike_flip;
-                    assign weights_exc[i]    = 16'h0300;
-                    assign weights_inh[i]    = 16'h0400;
-                    assign leak_val[i]       = 16'h0010;
+                    assign weights_exc[i]    = 8'h30;
+                    assign weights_inh[i]    = 8'h40;
+                    assign leak_val[i]       = 8'h01;
                 end
                 2: begin
                     assign map_spike_up[i]   = steep_up_cont;
                     assign map_spike_down[i] = steep_down_cont | spike_up_gentle | spike_down_gentle | spike_flip;
-                    assign weights_exc[i]    = 16'h0600;
-                    assign weights_inh[i]    = 16'h0400;
-                    assign leak_val[i]       = 16'h0080;
+                    assign weights_exc[i]    = 8'h60;   // 0x0600 / 16
+                    assign weights_inh[i]    = 8'h40;
+                    assign leak_val[i]       = 8'h08;   // 0x0080 / 16
                 end
                 3: begin
                     assign map_spike_up[i]   = steep_down_cont;
                     assign map_spike_down[i] = steep_up_cont | spike_up_gentle | spike_down_gentle | spike_flip;
-                    assign weights_exc[i]    = 16'h0600;
-                    assign weights_inh[i]    = 16'h0400;
-                    assign leak_val[i]       = 16'h0080;
+                    assign weights_exc[i]    = 8'h60;
+                    assign weights_inh[i]    = 8'h40;
+                    assign leak_val[i]       = 8'h08;
                 end
                 4: begin
                     assign map_spike_up[i]   = spike_flip;
                     assign map_spike_down[i] = (spike_up_gentle | spike_down_gentle |
                                                steep_up_cont | steep_down_cont) & ~spike_flip;
-                    assign weights_exc[i]    = 16'h0500;
-                    assign weights_inh[i]    = 16'h0200;
-                    assign leak_val[i]       = 16'h0040;
+                    assign weights_exc[i]    = 8'h50;   // 0x0500 / 16
+                    assign weights_inh[i]    = 8'h20;   // 0x0200 / 16
+                    assign leak_val[i]       = 8'h04;   // 0x0040 / 16
                 end
             endcase
 

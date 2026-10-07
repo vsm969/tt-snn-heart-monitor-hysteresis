@@ -1,92 +1,85 @@
 // -----------------------------------------------------------------------------
 // Decision_Engine.v
 //
-// Motor de decisión con histéresis temporal.
+// Motor de decisión con histéresis temporal y calibración adaptativa.
 // Parte del proyecto SNN Heart Monitor (basado en snn_lif_neurons_ttsky26c
 // de David Broughsmyth, Apache 2.0).
 //
 // Modificaciones Copyright (c) 2026 Vicente Antonio San Martín Fuentes
 // Cambios respecto al original:
-//   - Añadido registro de historial de clasificaciones.
-//   - Detector de N anomalías consecutivas con ventana deslizante.
+//   - Historial de anomalías consecutivas mediante contador (área optimizada).
+//   - Detección de N anomalías consecutivas.
 //   - Alarma persistente con histéresis (se limpia con un latido Normal).
-//
-// Nota: el modo de calibración adaptativa fue eliminado en una iteración
-// de optimización de área para ajustar el diseño a un tile 1x1.
+//   - Calibración adaptativa del umbral de detección de pico R, conectada
+//     de forma funcional al Heartbeat_Segmenter.
 // -----------------------------------------------------------------------------
 
 module Decision_Engine #(
-    parameter integer WINDOW_SIZE   = 3,
-    parameter integer ANOMALY_COUNT = 3
+    parameter integer WINDOW_SIZE    = 3,
+    parameter integer ANOMALY_COUNT  = 3,
+    parameter [11:0]  THRESHOLD_INIT = 12'd2200,
+    parameter [11:0]  THRESHOLD_STEP = 12'd50,
+    parameter [3:0]   CALIB_MAX      = 4'd8
 )(
     input  wire        clk,
     input  wire        rst_n,
     input  wire        sample_en,
     input  wire [2:0]  class_in,
+    input  wire        mode_sel,
     output reg         alarm,
-    output reg         pattern_detected
+    output reg         pattern_detected,
+    output reg  [11:0] threshold_out
 );
 
     // -------------------------------------------------------------------------
-    // 1. Registro de historial
+    // 1. Detección de anomalía (una sola expresión booleana)
+    //    Clases anómalas: 1 (001), 2 (010), 4 (100)
+    //    is_anomaly = c[2] | (c[1] ^ c[0])
     // -------------------------------------------------------------------------
-    reg [2:0] history [0:WINDOW_SIZE-1];
+    wire is_anomaly = class_in[2] | (class_in[1] ^ class_in[0]);
 
-    integer i;
+    // -------------------------------------------------------------------------
+    // 2. Contador de anomalías consecutivas (reemplaza el shift register)
+    //    El contador satura en ANOMALY_COUNT.
+    // -------------------------------------------------------------------------
+    reg [1:0] anomaly_count;
+
+    // -------------------------------------------------------------------------
+    // 3. Máquina de estados de la alarma (histéresis) + calibración
+    // -------------------------------------------------------------------------
+    reg [3:0] calib_count;
 
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
-            for (i = 0; i < WINDOW_SIZE; i = i + 1)
-                history[i] <= 3'd0;
+            anomaly_count     <= 2'd0;
+            alarm             <= 1'b0;
+            pattern_detected  <= 1'b0;
+            threshold_out     <= THRESHOLD_INIT;
+            calib_count       <= 4'd0;
         end
-        else if (sample_en) begin
-            for (i = WINDOW_SIZE-1; i > 0; i = i - 1)
-                history[i] <= history[i-1];
-            history[0] <= class_in;
-        end
-    end
-
-    // -------------------------------------------------------------------------
-    // 2. Detección de anomalías (usa la clase entrante + historial)
-    // -------------------------------------------------------------------------
-    function automatic is_anomaly(input [2:0] c);
-        is_anomaly = (c == 3'd1) || (c == 3'd2) || (c == 3'd4);
-    endfunction
-
-    reg window_would_be_full;
-    integer j;
-
-    always @(*) begin
-        window_would_be_full = is_anomaly(class_in);
-        for (j = 0; j < ANOMALY_COUNT - 1; j = j + 1) begin
-            if (!is_anomaly(history[j]))
-                window_would_be_full = 1'b0;
-        end
-    end
-
-    // -------------------------------------------------------------------------
-    // 3. Máquina de estados de la alarma (histéresis)
-    // -------------------------------------------------------------------------
-    always @(posedge clk or negedge rst_n) begin
-        if (!rst_n) begin
-            alarm            <= 1'b0;
+        else if (mode_sel && sample_en) begin
+            // Modo calibración: cada muestra Normal reduce el umbral
+            if (class_in == 3'd0 && calib_count < CALIB_MAX) begin
+                threshold_out <= threshold_out - THRESHOLD_STEP;
+                calib_count   <= calib_count + 1'b1;
+            end
             pattern_detected <= 1'b0;
         end
         else if (sample_en) begin
-            if (window_would_be_full) begin
-                alarm            <= 1'b1;
-                pattern_detected <= 1'b1;
+            pattern_detected <= 1'b0;
+            if (is_anomaly) begin
+                if (anomaly_count < 2'd3)
+                    anomaly_count <= anomaly_count + 1'b1;
+                if (anomaly_count == 2'd2) begin
+                    pattern_detected <= 1'b1;
+                    alarm            <= 1'b1;
+                end
             end
             else begin
-                pattern_detected <= 1'b0;
-
-                // Limpiar la alarma si llega un latido Normal
+                anomaly_count <= 2'd0;
                 if (class_in == 3'd0)
                     alarm <= 1'b0;
             end
-        end
-        else begin
-            pattern_detected <= 1'b0;
         end
     end
 

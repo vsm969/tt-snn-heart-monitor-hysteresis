@@ -3,14 +3,19 @@
  * SPDX-License-Identifier: Apache-2.0
  *
  * MultiClass_SNN_Voter.v - Majority vote with required win margin
+ *
+ * Optimizacion de area (2026):
+ *   - Contadores reducidos de 16 a 8 bits.
+ *   - Eliminado step_sum: ahora usa input_spikes directamente.
+ *   - max_count, second_count, c reducidos de 16 a 8 bits.
  */
 
 `default_nettype none
 
 module MultiClass_SNN_Voter #(
     parameter PARALLEL_NEURONS = 5,
-    parameter BIT_WIDTH        = 16,
-    parameter WIN_MARGIN       = 16'd8
+    parameter BIT_WIDTH        = 8,
+    parameter WIN_MARGIN       = 8'd8
 )(
     input  wire                         clk,
     input  wire                         rst,
@@ -23,23 +28,6 @@ module MultiClass_SNN_Voter #(
 );
 
     reg [BIT_WIDTH-1:0] count_N, count_S, count_V, count_F, count_Q;
-    reg [5:0] step_sum_N, step_sum_S, step_sum_V, step_sum_F, step_sum_Q;
-
-    integer j;
-    always @(*) begin
-        step_sum_N = 0; step_sum_S = 0; step_sum_V = 0; step_sum_F = 0; step_sum_Q = 0;
-        for (j = 0; j < PARALLEL_NEURONS; j = j + 1) begin
-            if (input_spikes[j]) begin
-                case (j % 5)
-                    0: step_sum_N = step_sum_N + 1;
-                    1: step_sum_S = step_sum_S + 1;
-                    2: step_sum_V = step_sum_V + 1;
-                    3: step_sum_F = step_sum_F + 1;
-                    4: step_sum_Q = step_sum_Q + 1;
-                endcase
-            end
-        end
-    end
 
     reg [BIT_WIDTH-1:0] max_count;
     reg [BIT_WIDTH-1:0] second_count;
@@ -81,11 +69,12 @@ module MultiClass_SNN_Voter #(
             else
                 assigned_class <= best_class;
         end else begin
-            count_N <= count_N + step_sum_N;
-            count_S <= count_S + step_sum_S;
-            count_V <= count_V + step_sum_V;
-            count_F <= count_F + step_sum_F;
-            count_Q <= count_Q + step_sum_Q;
+            // Uso directo de input_spikes (cada uno es 1 bit)
+            count_N <= count_N + input_spikes[0];
+            count_S <= count_S + input_spikes[1];
+            count_V <= count_V + input_spikes[2];
+            count_F <= count_F + input_spikes[3];
+            count_Q <= count_Q + input_spikes[4];
             valid_out <= 0;
         end
     end
