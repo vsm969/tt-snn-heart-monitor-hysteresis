@@ -55,7 +55,7 @@ pinout:
   uio[2]: "ADC_data[10]"
   uio[3]: "ADC_data[11]"
   uio[4]: "sample_en"
-  uio[5]: "mode_sel"
+  uio[5]: ""
   uio[6]: "force_class"
   uio[7]: ""
 

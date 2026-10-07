@@ -73,21 +73,6 @@ async def test_wiring_stability(dut):
     dut._log.info("10 muestras procesadas sin crash")
 
 
-@cocotb.test()
-async def test_mode_sel_does_not_break(dut):
-    """El modo calibración no debe romper el DUT."""
-    clock = Clock(dut.clk, CLK_PERIOD_US, unit="us")
-    cocotb.start_soon(clock.start())
-
-    await reset_dut(dut)
-
-    for i in range(5):
-        await send_sample(dut, adc_value=1000, sample_en=True, mode_sel=1)
-
-    for i in range(5):
-        await send_sample(dut, adc_value=1000, sample_en=True, mode_sel=0)
-
-    dut._log.info("Modo calibración ejecutado sin crash")
 
 @cocotb.test()
 async def test_forced_class_hysteresis(dut):

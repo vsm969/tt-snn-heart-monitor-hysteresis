@@ -56,7 +56,6 @@ module tt_um_arrhythmia_detector (
     // -------------------------------------------------------------------------
     wire        rst         = ~rst_n;
     wire        sample_en   = uio_in[4];
-    wire        mode_sel    = uio_in[5];
     wire [11:0] adc_data_in = {uio_in[3:0], ui_in};
 
     // -------------------------------------------------------------------------
@@ -86,27 +85,20 @@ module tt_um_arrhythmia_detector (
     // -------------------------------------------------------------------------
     wire        alarm_persistent;
     wire        pattern_detected;
-    wire [11:0] threshold_dyn;
 
     assign class_forced = uio_in[6] ? ui_in[2:0] : heart_class_out;
 
     Decision_Engine #(
         .WINDOW_SIZE    (3),
-        .ANOMALY_COUNT  (3),
-        .THRESHOLD_INIT (12'd2200),
-        .THRESHOLD_STEP (12'd50),
-        .CALIB_MAX      (4'd8)
+        .ANOMALY_COUNT  (3)
     ) u_decision (
         .clk              (clk),
         .rst_n            (rst_n),
         .sample_en        (sample_en),
         .class_in         (class_forced),
-        .mode_sel         (mode_sel),
         .alarm            (alarm_persistent),
-        .pattern_detected (pattern_detected),
-        .threshold_out    (threshold_dyn)
+        .pattern_detected (pattern_detected)
     );
-
     // -------------------------------------------------------------------------
     // Mapeo de salidas (alineado con info.yaml)
     // -------------------------------------------------------------------------
@@ -135,6 +127,6 @@ module tt_um_arrhythmia_detector (
     // - ena: no se usa en este diseño
     // - uio_in[7:6]: reservados para futuras expansiones
     // - threshold_dyn: reservado para futura integración con Heartbeat_Segmenter
-    wire _unused = &{ena, uio_in[7:6], threshold_dyn, 1'b0};
+    wire _unused = &{ena, uio_in[7:5], 1'b0};
 
 endmodule
