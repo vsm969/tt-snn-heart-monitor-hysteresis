@@ -82,3 +82,116 @@ async def test_calibration_mode(dut):
     # Volver a modo inferencia
     await send_forced_class(dut, 2)
     dut._log.info("Calibracion ejecutada sin crash")
+
+
+@cocotb.test()
+async def test_fusion_does_not_clear_alarm(dut):
+    """La clase Fusión (3) no debe limpiar la alarma."""
+    clock = Clock(dut.clk, CLK_PERIOD_US, unit="us")
+    cocotb.start_soon(clock.start())
+    await reset_dut(dut)
+
+    # Activar alarma con 3 ventriculares
+    await send_forced_class(dut, 2)
+    await send_forced_class(dut, 2)
+    await send_forced_class(dut, 2)
+    assert ((dut.uo_out.value.to_unsigned() >> 0) & 1) == 1
+
+    # Enviar clase Fusión (no debe limpiar)
+    await send_forced_class(dut, 3)
+    assert ((dut.uo_out.value.to_unsigned() >> 0) & 1) == 1, \
+        "La clase Fusión no debe limpiar la alarma"
+
+    # Ahora sí, Normal limpia
+    await send_forced_class(dut, 0)
+    assert ((dut.uo_out.value.to_unsigned() >> 0) & 1) == 0
+
+
+
+@cocotb.test()
+async def test_more_than_3_anomalies(dut):
+    """4 o más anomalías mantienen la alarma activa."""
+    clock = Clock(dut.clk, CLK_PERIOD_US, unit="us")
+    cocotb.start_soon(clock.start())
+    await reset_dut(dut)
+
+    for _ in range(5):
+        await send_forced_class(dut, 2)
+
+    assert ((dut.uo_out.value.to_unsigned() >> 0) & 1) == 1, \
+        "La alarma debe mantenerse activa con 5 anomalías"
+
+
+
+@cocotb.test()
+async def test_interrupted_sequence(dut):
+    """2 anomalías, luego Normal, luego 2 anomalías NO debe activar la alarma."""
+    clock = Clock(dut.clk, CLK_PERIOD_US, unit="us")
+    cocotb.start_soon(clock.start())
+    await reset_dut(dut)
+
+    await send_forced_class(dut, 2)
+    await send_forced_class(dut, 2)
+    await send_forced_class(dut, 0)   # Interrumpe
+    await send_forced_class(dut, 2)
+    await send_forced_class(dut, 2)
+
+    assert ((dut.uo_out.value.to_unsigned() >> 0) & 1) == 0, \
+        "El contador debe haberse reseteado con el Normal"
+
+
+
+@cocotb.test()
+async def test_all_anomaly_classes(dut):
+    """Las clases 1, 2 y 4 cuentan como anomalías."""
+    clock = Clock(dut.clk, CLK_PERIOD_US, unit="us")
+    cocotb.start_soon(clock.start())
+    await reset_dut(dut)
+
+    # Mezcla de clases anómalas
+    await send_forced_class(dut, 1)  # Supraventricular
+    await send_forced_class(dut, 2)  # Ventricular
+    await send_forced_class(dut, 4)  # Desconocido
+
+    assert ((dut.uo_out.value.to_unsigned() >> 0) & 1) == 1, \
+        "Mezcla de 1, 2, 4 debe activar la alarma"
+
+
+
+@cocotb.test()
+async def test_pattern_pulse_width(dut):
+    """pattern_detected debe ser un pulso de un solo ciclo."""
+    clock = Clock(dut.clk, CLK_PERIOD_US, unit="us")
+    cocotb.start_soon(clock.start())
+    await reset_dut(dut)
+
+    await send_forced_class(dut, 2)
+    await send_forced_class(dut, 2)
+    await send_forced_class(dut, 2)
+
+    # pattern_detected debe estar alto justo en el ciclo de la 3ra anomalía
+    assert ((dut.uo_out.value.to_unsigned() >> 1) & 1) == 1
+
+    # Esperar varios ciclos y verificar que bajó
+    await ClockCycles(dut.clk, 5)
+    assert ((dut.uo_out.value.to_unsigned() >> 1) & 1) == 0, \
+        "pattern_detected debe bajar después del pulso"
+
+
+@cocotb.test()
+async def test_calibration_reduces_threshold(dut):
+    """La calibración debe reducir el umbral interno."""
+    clock = Clock(dut.clk, CLK_PERIOD_US, unit="us")
+    cocotb.start_soon(clock.start())
+    await reset_dut(dut)
+
+    # Acceder al registro interno del Decision Engine
+    umbral_inicial = dut.user_project.u_decision.threshold_out.value.to_unsigned()
+
+    # Modo calibración + 4 clases Normal
+    for _ in range(4):
+        await send_forced_class(dut, 0, mode_sel=1)
+
+    umbral_final = dut.user_project.u_decision.threshold_out.value.to_unsigned()
+    assert umbral_final < umbral_inicial, \
+        f"El umbral debe reducirse (era {umbral_inicial}, ahora {umbral_final})"
