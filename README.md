@@ -37,34 +37,36 @@ The difference between a classifier and a monitoring system: a real cardiac moni
 ---
 
 ## 🏗️ Architecture
-┌───────────────────────────────────────┐
-│ SNN Core (original) │
-│ │
-ADC_data ──────►│ Heartbeat_Segmenter │
-(12 bits) │ ↓ │
-│ Delta_Encoder │
-│ ↓ │
-│ Parallel_SNN_Matrix (5 LIF neurons) │
-│ ↓ │
-│ MultiClass_SNN_Voter ──► class_out │
-└──────────────────┬────────────────────┘
-│
-▼
-┌───────────────────────────────────────┐
-│ Decision_Engine (new) │
-│ │
-│ Anomaly counter (2-bit) │
-│ ↓ │
-│ Pattern detector (3 consecutive) │
-│ ↓ │
-│ Hysteresis FSM │
-│ ↓ │
-│ ┌────────────┐ ┌───────────────┐ │
-│ │ alarm │ │ threshold │ │
-│ │ (persistent)│ │ calibration │ │
-│ └────────────┘ └───────────────┘ │
-└───────────────────────────────────────┘
 
+```mermaid
+flowchart TB
+    ADC["ADC_data (12 bits)"]
+
+    subgraph SNN["SNN Core (original)"]
+        HS[Heartbeat_Segmenter]
+        DEN[Delta_Encoder]
+        PSM[Parallel_SNN_Matrix<br/>5 LIF neurons]
+        MCV[MultiClass_SNN_Voter]
+        HS --> DEN
+        DEN --> PSM
+        PSM --> MCV
+    end
+
+    ADC --> HS
+    MCV -->|class_out| AC
+
+    subgraph DEC["Decision_Engine (new)"]
+        AC[Anomaly counter<br/>2-bit]
+        PD[Pattern detector<br/>3 consecutive]
+        HF[Hysteresis FSM]
+        AL[alarm<br/>persistent]
+        TH[threshold<br/>calibration]
+        AC --> PD
+        PD --> HF
+        HF --> AL
+        HF --> TH
+    end
+```
 
 ### Modules
 
