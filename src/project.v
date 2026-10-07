@@ -91,7 +91,7 @@ module tt_um_arrhythmia_detector (
     assign class_forced = uio_in[6] ? ui_in[2:0] : heart_class_out;
 
     Decision_Engine #(
-        .WINDOW_SIZE    (5),
+        .WINDOW_SIZE    (3),
         .ANOMALY_COUNT  (3),
         .THRESHOLD_INIT (12'd2200),
         .THRESHOLD_STEP (12'd50),

@@ -13,7 +13,7 @@
 // -----------------------------------------------------------------------------
 
 module Decision_Engine #(
-    parameter integer WINDOW_SIZE   = 5,
+    parameter integer WINDOW_SIZE   = 3,
     parameter integer ANOMALY_COUNT = 3,
     parameter [11:0]  THRESHOLD_INIT = 12'd2200,
     parameter [11:0]  THRESHOLD_STEP = 12'd50,
