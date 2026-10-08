@@ -7,9 +7,9 @@ Each image must be less than 512 kB, combined total under 1 MB.
 
 ## How it works
 
-This chip implements a **cardiac arrhythmia detector** using a **Spiking Neural Network (SNN)** followed by a **Decision Engine** that adds temporal reasoning, being useful in the future to apply it in everyday medical aplication, improving people's lives.
+This chip implements a **cardiac arrhythmia detector** using a **Spiking Neural Network (SNN)** followed by a **Decision Engine** that adds temporal reasoning, being useful in the future to apply it in everyday medical application, improving people's lives.
 
-The design is a derivative of the [`snn_lif_neurons_ttsky26c`](https://github.com/davidbroughsmyth/snn_lif_neurons_ttsky26c) project by David Broughsmyth, wich was a great start, but it could be improved, which classifies each heartbeat into one of five categories:
+The design is a derivative of the [`snn_lif_neurons_ttsky26c`](https://github.com/davidbroughsmyth/snn_lif_neurons_ttsky26c) project by David Broughsmyth, which was a great start, but it could be improved, which classifies each heartbeat into one of five categories:
 
 - `0` — Normal
 - `1` — Supraventricular
@@ -41,7 +41,7 @@ Additionally:
 
 ### Design decisions 
 
-- **1x1 tile size**: the design fits in a single tile at 79.5% utilization, the size of the tile was imposed by the administrator of the CANELOS Tiny Tapeot workshop.
+- **1x1 tile size**: the design fits in a single tile at 81.4% utilization, the size of the tile was imposed by the CANELOS Tiny Tapeout workshop organizers.
 - **40 MHz clock**: nominal frequency.
 - **Synchronous, single clock domain**: no CDC or asynchronous logic.
 
@@ -66,7 +66,7 @@ The testbench exercises nine scenarios:
 8. **Pattern pulse width** — verifies `pattern_detected` is a single-cycle pulse.
 9. **Calibration reduces threshold** — verifies the calibration mode actually lowers the internal threshold.
 
-```markdown
+
 ### Formal verification
 
 The `Decision_Engine` was formally verified with SymbiYosys + Z3. Three
@@ -79,18 +79,15 @@ design: `pattern_detected` could stay high for more than one cycle when
 `sample_en` went low. The fix and the reverification are documented in
 the repository.
 
-Manual testing
+### Manual testing
 To test with real hardware:
 
-Connect an ECG signal source to ui_in[7:0] and uio_in[3:0].
-
-Pulse uio_in[4] (sample_en) when a new sample is ready.
-
-Observe uo_out[0] (alarm), uo_out[1] (pattern_detected), and uo_out[4:2] (class_out).
-
-For a functional test without an ECG, set uio_in[6] (force_class) high and inject a class on ui_in[2:0].
+1. Connect an ECG signal source to `ui_in[7:0]` and `uio_in[3:0]`.
+2. Pulse `uio_in[4]` (`sample_en`) when a new sample is ready.
+3. Observe `uo_out[0]` (`alarm`), `uo_out[1]` (`pattern_detected`), and `uo_out[4:2]` (`class_out`).
+4. For a functional test without an ECG, set `uio_in[6]` (`force_class`) high and inject a class on `ui_in[2:0]`.
 
 ## External hardware 
 
-No external hardware is required to this project. The design is made to be tested with a standard ECG ADC or in standalone mode using the force_class test mode.
+No external hardware is required for this project. The design is made to be tested with a standard ECG ADC or in standalone mode using the force_class test mode.
 

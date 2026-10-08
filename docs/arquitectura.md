@@ -5,11 +5,14 @@ SNN Arrhythmia Detector with Hysteresis.
 
 ## Table of contents
 
+## Table of contents
+
 1. [System overview](#system-overview)
 2. [SNN core](#snn-core)
 3. [Decision Engine](#decision-engine)
 4. [Signal flow example](#signal-flow-example)
 5. [Timing considerations](#timing-considerations)
+6. [Formal verification](#formal-verification)
 
 ## System overview
 
@@ -91,6 +94,7 @@ The Decision Engine is a small module that adds temporal reasoning.
 
    ```verilog
    wire is_anomaly = class_in[2] | (class_in[1] ^ class_in[0]);
+   ```
 
 2. **Anomaly counter** — a 2-bit register that increments on each anomaly and resets on a Normal beat:
 
@@ -99,6 +103,7 @@ The Decision Engine is a small module that adds temporal reasoning.
         if (anomaly_count < 2'd3) anomaly_count <= anomaly_count + 1'b1;
     else
         anomaly_count <= 2'd0;
+    ```
 
 3. **Pattern detection** — when the counter reaches 2 (meaning this is the 3rd consecutive anomaly), a pulse is generated:
 
@@ -107,18 +112,21 @@ The Decision Engine is a small module that adds temporal reasoning.
         pattern_detected <= 1'b1;
         alarm            <= 1'b1;
     end
+    ```
 
 4. **Hysteresis** — the alarm is only cleared when a Normal beat arrives:
 
    ```verilog
     if (class_in == 3'd0)
         alarm <= 1'b0;
+    ```
 
 5. **Calibration** — when mode_sel is high and the class is Normal, the threshold is reduced:
 
    ```verilog
     if (mode_sel && sample_en && class_in == 3'd0 && calib_count < CALIB_MAX)
         threshold_out <= threshold_out - THRESHOLD_STEP;
+    ```
 
 
 ## Signal flow example
@@ -139,8 +147,9 @@ The Decision Engine runs at the same clock frequency as the SNN core. The 2-bit 
 
 The critical path of the module is the chain:
 
-
-class_in → is_anomaly → anomaly_count → window_would_be_full → alarm
+```
+class_in -> is_anomaly -> anomaly_count -> window_would_be_full -> alarm
+```
 
 This path is short, and the design closes timing at 40 MHz with margin in the SKY130A process.
 

@@ -5,7 +5,7 @@
  * Parallel_SNN_Matrix.v - Class-specialized banded rate coding
  * Default NUM_NEURONS=5 (one neuron per AAMI class) for Tiny Tapeout area.
  *
- *El proyecto original solo clasificaba los latidos, pero no utilizaba memoria ni reconocia patrones de latidos por lo que decidi añadirle una aplicacion con prevencion medica.
+ * El proyecto original solo clasificaba los latidos, pero no utilizaba memoria ni reconocía patrones de latidos por lo que decidí añadirle una aplicación con prevención medica.
  *
  * Optimizacion de area (2026): BIT_WIDTH reducido a 8, pesos escalados 1/16.
  */

@@ -5,7 +5,7 @@
 // Parte del proyecto SNN Heart Monitor (basado en snn_lif_neurons_ttsky26c
 // de David Broughsmyth, Apache 2.0).
 //
-//El proyecto original solo clasificaba los latidos, pero no utilizaba memoria ni reconocia patrones de latidos por lo que decidi añadirle una aplicacion con prevencion medica.
+//El proyecto original solo clasificaba los latidos, pero no utilizaba memoria ni reconocía patrones de latidos por lo que decidí añadirle una aplicación con prevención medica.
 //
 // Modificaciones Copyright (c) 2026 Vicente Antonio San Martín Fuentes
 // Cambios respecto al original:
@@ -17,8 +17,6 @@
 // -----------------------------------------------------------------------------
 
 module Decision_Engine #(
-    parameter integer WINDOW_SIZE    = 3,
-    parameter integer ANOMALY_COUNT  = 3,
     parameter [11:0]  THRESHOLD_INIT = 12'd2200,
     parameter [11:0]  THRESHOLD_STEP = 12'd50,
     parameter [3:0]   CALIB_MAX      = 4'd8

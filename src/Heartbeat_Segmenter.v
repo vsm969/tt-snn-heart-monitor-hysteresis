@@ -4,8 +4,7 @@
  *
  * Heartbeat_Segmenter.v - Window controller state machine
  *
- *El proyecto original solo clasificaba los latidos, pero no utilizaba memoria ni reconocia patrones de latidos por lo que decidi añadirle una aplicacion con prevencion medica.
- * Optimizacion de area (2026):
+ * El proyecto original solo clasificaba los latidos, pero no utilizaba memoria ni reconocía patrones de latidos por lo que decidí añadirle una aplicación con prevención medica. * Optimizacion de area (2026):
  *   - cycle_counter reducido de 16 a 8 bits.
  *   - Anadido puerto threshold_in (12 bits) para calibracion adaptativa.
  */

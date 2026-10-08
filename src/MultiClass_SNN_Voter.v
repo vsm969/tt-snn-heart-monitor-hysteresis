@@ -4,7 +4,7 @@
  *
  * MultiClass_SNN_Voter.v - Majority vote with required win margin
  *
- *El proyecto original solo clasificaba los latidos, pero no utilizaba memoria ni reconocia patrones de latidos por lo que decidi añadirle una aplicacion con prevencion medica.
+ * El proyecto original solo clasificaba los latidos, pero no utilizaba memoria ni reconocía patrones de latidos por lo que decidí añadirle una aplicación con prevención medica.
  *
  * Optimizacion de area (2026):
  *   - Contadores reducidos de 16 a 8 bits.

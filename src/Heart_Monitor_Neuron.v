@@ -4,7 +4,7 @@
  *
  * Heart_Monitor_Neuron.v - LIF with dynamic leak and window clear
  *
- *El proyecto original solo clasificaba los latidos, pero no utilizaba memoria ni reconocia patrones de latidos por lo que decidi añadirle una aplicacion con prevencion medica.
+ * El proyecto original solo clasificaba los latidos, pero no utilizaba memoria ni reconocía patrones de latidos por lo que decidí añadirle una aplicación con prevención medica.
  * Optimizacion de area (2026): BIT_WIDTH reducido de 16 a 8.
  * Los pesos y el umbral estan pre-escalados por 1/16, manteniendo
  * el comportamiento funcional identico.

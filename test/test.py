@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 # Testbench para tt_um_arrhythmia_detector
-# Modificaciones Copyright (c) 2026 Vicente Antonio San Martin Fuentes
+# Modificaciones Copyright (c) 2026 Vicente Antonio San Martín Fuentes
 
 import cocotb
 from cocotb.clock import Clock

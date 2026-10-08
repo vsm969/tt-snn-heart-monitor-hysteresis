@@ -5,9 +5,9 @@
  * Tiny Tapeout wrapper for the SNN heart-monitor classifier.
  *
  * -----------------------------------------------------------------------------
- * Modifications Copyright (c) 2026 Vicente Antonio San Martin Fuentes
+ * Modifications Copyright (c) 2026 Vicente Antonio San Martín Fuentes
  *
-* El proyecto original solo clasificaba los latidos, pero no utilizaba memoria ni reconocia patrones de latidos por lo que decidi añadirle una aplicacion con prevencion medica.
+ * El proyecto original solo clasificaba los latidos, pero no utilizaba memoria ni reconocía patrones de latidos por lo que decidí añadirle una aplicación con prevención medica.
  *
  * This file has been modified from the original. Changes include:
  *   - Integrated Decision_Engine module for temporal hysteresis, consecutive
@@ -54,8 +54,6 @@ module tt_um_arrhythmia_detector (
     assign class_forced = uio_in[6] ? ui_in[2:0] : heart_class_out;
 
     Decision_Engine #(
-        .WINDOW_SIZE    (3),
-        .ANOMALY_COUNT  (3),
         .THRESHOLD_INIT (12'd2200),
         .THRESHOLD_STEP (12'd50),
         .CALIB_MAX      (4'd8)

@@ -41,8 +41,6 @@ module Decision_Engine_formal (
     // DUT instance
     // -------------------------------------------------------------------------
     Decision_Engine #(
-        .WINDOW_SIZE    (3),
-        .ANOMALY_COUNT  (3),
         .THRESHOLD_INIT (12'd2200),
         .THRESHOLD_STEP (12'd50),
         .CALIB_MAX      (4'd8)
