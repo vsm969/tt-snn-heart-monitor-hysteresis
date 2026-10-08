@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2025 davidbroughsmyth
  * SPDX-License-Identifier: Apache-2.0
- *
+ * El proyecto original solo clasificaba los latidos, pero no utilizaba memoria ni reconocia patrones de latidos por lo que decidi añadirle una aplicacion con prevencion medica.
  * Delta_Encoder.v - Banded slope encoder (gentle vs steep) + direction flips
  */
 

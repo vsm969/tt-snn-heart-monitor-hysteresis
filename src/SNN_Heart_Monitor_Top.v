@@ -4,6 +4,8 @@
  *
  * SNN_Heart_Monitor_Top.v - Heart-monitor SNN core (Tiny Tapeout sized)
  *
+* El proyecto original solo clasificaba los latidos, pero no utilizaba memoria ni reconocia patrones de latidos por lo que decidi añadirle una aplicacion con prevencion medica.
+ *
  * Optimizacion de area (2026):
  *   - BIT_WIDTH propagado reducido a 8.
  *   - consecutive_anomaly_counter reducido de 8 a 3 bits.

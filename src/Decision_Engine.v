@@ -5,6 +5,8 @@
 // Parte del proyecto SNN Heart Monitor (basado en snn_lif_neurons_ttsky26c
 // de David Broughsmyth, Apache 2.0).
 //
+//El proyecto original solo clasificaba los latidos, pero no utilizaba memoria ni reconocia patrones de latidos por lo que decidi añadirle una aplicacion con prevencion medica.
+//
 // Modificaciones Copyright (c) 2026 Vicente Antonio San Martín Fuentes
 // Cambios respecto al original:
 //   - Historial de anomalías consecutivas mediante contador (área optimizada).
@@ -49,24 +51,24 @@ module Decision_Engine #(
     // -------------------------------------------------------------------------
     reg [3:0] calib_count;
 
-    always @(posedge clk or negedge rst_n) begin
-        if (!rst_n) begin
-            anomaly_count     <= 2'd0;
-            alarm             <= 1'b0;
-            pattern_detected  <= 1'b0;
-            threshold_out     <= THRESHOLD_INIT;
-            calib_count       <= 4'd0;
-        end
-        else if (mode_sel && sample_en) begin
-            // Modo calibración: cada muestra Normal reduce el umbral
+   always @(posedge clk or negedge rst_n) begin
+    if (!rst_n) begin
+        anomaly_count     <= 2'd0;
+        alarm             <= 1'b0;
+        pattern_detected  <= 1'b0;
+        threshold_out     <= THRESHOLD_INIT;
+        calib_count       <= 4'd0;
+    end
+    else begin
+        pattern_detected <= 1'b0;   // <-- DEFAULT: limpiar cada ciclo
+
+        if (mode_sel && sample_en) begin
             if (class_in == 3'd0 && calib_count < CALIB_MAX) begin
                 threshold_out <= threshold_out - THRESHOLD_STEP;
                 calib_count   <= calib_count + 1'b1;
             end
-            pattern_detected <= 1'b0;
         end
         else if (sample_en) begin
-            pattern_detected <= 1'b0;
             if (is_anomaly) begin
                 if (anomaly_count < 2'd3)
                     anomaly_count <= anomaly_count + 1'b1;
@@ -82,5 +84,6 @@ module Decision_Engine #(
             end
         end
     end
+end
 
 endmodule

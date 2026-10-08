@@ -7,6 +7,8 @@
  * -----------------------------------------------------------------------------
  * Modifications Copyright (c) 2026 Vicente Antonio San Martin Fuentes
  *
+* El proyecto original solo clasificaba los latidos, pero no utilizaba memoria ni reconocia patrones de latidos por lo que decidi añadirle una aplicacion con prevencion medica.
+ *
  * This file has been modified from the original. Changes include:
  *   - Integrated Decision_Engine module for temporal hysteresis, consecutive
  *     anomaly pattern detection, and adaptive threshold calibration.

@@ -12,12 +12,12 @@ A Tiny Tapeout project that classifies heartbeats using a Spiking Neural Network
 
 This chip implements an **intelligent cardiac monitor on silicon**. It takes a stream of digitized ECG samples and:
 
-1. **Classifies** each heartbeat into one of five categories using a Spiking Neural Network.
-2. **Detects patterns** of 3 or more consecutive anomalous beats.
-3. **Raises a persistent alarm** when such a pattern is detected. The alarm stays active until a Normal beat clears it — this is the **hysteresis** behavior.
-4. **Adapts** to a patient's baseline through an optional calibration mode.
+1. **Classifies** each heartbeat into one of five categories, all of this using a Spiking Neural Network.
+2. **Detects patterns** of 3 or more consecutive anomalous beats, to reach out a possible arrhythmia.
+3. **Raises a persistent alarm** when such a pattern is detected. The alarm will be trigered and stays active until a Normal beat clears it — this is the **hysteresis** behavior.
+4. **Adapts** to a patient's baseline through a calibration mode, learning from the registered data to prevent false positive.
 
-This is a **derivative work** based on the original [`snn_lif_neurons_ttsky26c`](https://github.com/davidbroughsmyth/snn_lif_neurons_ttsky26c) project by [David Broughsmyth](https://github.com/davidbroughsmyth). The original project classifies individual heartbeats. This project goes **one step further** by adding a **Decision Engine** that gives the chip **temporal awareness**.
+This is a **derivative work** based on the original [`snn_lif_neurons_ttsky26c`](https://github.com/davidbroughsmyth/snn_lif_neurons_ttsky26c) project by [David Broughsmyth](https://github.com/davidbroughsmyth). The original project classifies individual heartbeats. This project goes **one step further** by adding a **Decision Engine** that gives the chip **temporal awareness**, and its a big improvement with future aplications on medicine.
 
 ---
 
@@ -32,7 +32,7 @@ This is a **derivative work** based on the original [`snn_lif_neurons_ttsky26c`]
 | **Adaptive threshold** calibration | ❌ | ✅ **NEW** |
 | **Test mode** for verification | ❌ | ✅ **NEW** |
 
-The difference between a classifier and a monitoring system: a real cardiac monitor does not just label a beat; it **remembers** what happened and **decides** when to alert.
+The difference between a classifier and a monitoring and warning system: a real cardiac monitor does not just label a beat; it **remembers** what happened and **decides** when to alert, for user safety.
 
 ---
 
@@ -163,7 +163,7 @@ tt-snn-heart-monitor-hysteresis/
 ├── README.md                     # This file
 └── LICENSE                       # Apache 2.0
 
-🛠️ Design notes
+🛠️ Design notes 
 Technology and tools
 Language: Verilog
 
@@ -195,9 +195,9 @@ This is a classic lesson in synchronous design: when a combinational block feeds
 
 Area optimization
 
-The original design fit in 1x2 tiles. To fit in 1x1 (required by the workshop), the following optimizations were applied:
+The original design fit in 1x2 tiles, and the requirements of CANELOS is that the project had to fit in a 1x1 tile. To fit in 1x1 , the following optimizations were applied:
 
-Reduced BIT_WIDTH from 16 to 8 bits in the LIF neurons and voter (weights were all multiples of 16).
+Reduced BIT_WIDTH from 16 to 8 bits in the LIF neurons and voter (weights were all multiples of 16), this was because of the las number asociated to this variables was 150, a number that could fit in 8 bits.
 
 Simplified the voter by removing the redundant step_sum logic.
 
@@ -207,7 +207,7 @@ Reduced cycle_counter in the Heartbeat_Segmenter from 16 to 8 bits.
 
 Used SYNTH_STRATEGY: "AREA 2" and PL_TARGET_DENSITY_PCT: 80 in LibreLane.
 
-Result: utilization went from 133% (did not fit) to 79.5% in 1x1.
+Result: utilization went from 133% (did not fit) to 79.5% in 1x1, achieving the objective.
 
 📚 Documentation
 Datasheet
@@ -230,8 +230,8 @@ Framework: Tiny Tapeout, cocotb, LibreLane
 
 PDK: SkyWater SKY130A
 
-🎓 Context
-Developed during the CANELOS seminar at Universidad Técnica Federico Santa María (USM), Chile, as part of the Tiny Tapeout workshop.
+🎓 Context 
+Developed during the CANELOS seminar at Universidad Técnica Federico Santa María (USM), of wich i am a student, in Chile, as part of the Tiny Tapeout workshop, organized by the student initiative CHIPUSM, furthermore, this was one of my goals, to be able to carry out a proyect with a difficulty beyond the basics like this project.
 
 📖 References
 Broughsmyth, D. (2025). snn_lif_neurons_ttsky26c. GitHub.

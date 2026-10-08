@@ -7,9 +7,9 @@ Each image must be less than 512 kB, combined total under 1 MB.
 
 ## How it works
 
-This chip implements a **cardiac arrhythmia detector** using a **Spiking Neural Network (SNN)** followed by a **Decision Engine** that adds temporal reasoning.
+This chip implements a **cardiac arrhythmia detector** using a **Spiking Neural Network (SNN)** followed by a **Decision Engine** that adds temporal reasoning, being useful in the future to apply it in everyday medical aplication, improving people's lives.
 
-The design is a derivative of the [`snn_lif_neurons_ttsky26c`](https://github.com/davidbroughsmyth/snn_lif_neurons_ttsky26c) project by David Broughsmyth, which classifies each heartbeat into one of five categories:
+The design is a derivative of the [`snn_lif_neurons_ttsky26c`](https://github.com/davidbroughsmyth/snn_lif_neurons_ttsky26c) project by David Broughsmyth, wich was a great start, but it could be improved, which classifies each heartbeat into one of five categories:
 
 - `0` — Normal
 - `1` — Supraventricular
@@ -39,9 +39,9 @@ Additionally:
 - **Calibration mode** (`mode_sel = 1`): while active, each Normal-labelled sample reduces the internal threshold of the heartbeat segmenter, adapting to a patient's baseline.
 - **Test mode** (`force_class = 1`): the Decision Engine reads its input class directly from `ui_in[2:0]`, bypassing the SNN. This enables direct verification of the decision logic.
 
-### Design decisions
+### Design decisions 
 
-- **1x1 tile size**: the design fits in a single tile at 79.5% utilization.
+- **1x1 tile size**: the design fits in a single tile at 79.5% utilization, the size of the tile was imposed by the administrator of the CANELOS Tiny Tapeot workshop.
 - **40 MHz clock**: nominal frequency.
 - **Synchronous, single clock domain**: no CDC or asynchronous logic.
 
@@ -72,7 +72,7 @@ Observe uo_out[0] (alarm), uo_out[1] (pattern_detected), and uo_out[4:2] (class_
 
 For a functional test without an ECG, set uio_in[6] (force_class) high and inject a class on ui_in[2:0].
 
-## External hardware
+## External hardware 
 
-No external hardware is required. The design can be tested with a standard ECG ADC or in standalone mode using the force_class test mode.
+No external hardware is required to this project. The design is made to be tested with a standard ECG ADC or in standalone mode using the force_class test mode.
 
