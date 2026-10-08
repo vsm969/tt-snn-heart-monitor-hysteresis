@@ -51,39 +51,40 @@ module Decision_Engine #(
     // -------------------------------------------------------------------------
     reg [3:0] calib_count;
 
-   always @(posedge clk or negedge rst_n) begin
-    if (!rst_n) begin
-        anomaly_count     <= 2'd0;
-        alarm             <= 1'b0;
-        pattern_detected  <= 1'b0;
-        threshold_out     <= THRESHOLD_INIT;
-        calib_count       <= 4'd0;
-    end
-    else begin
-        pattern_detected <= 1'b0;   // <-- DEFAULT: limpiar cada ciclo
-
-        if (mode_sel && sample_en) begin
-            if (class_in == 3'd0 && calib_count < CALIB_MAX) begin
-                threshold_out <= threshold_out - THRESHOLD_STEP;
-                calib_count   <= calib_count + 1'b1;
-            end
+    always @(posedge clk or negedge rst_n) begin
+        if (!rst_n) begin
+            anomaly_count     <= 2'd0;
+            alarm             <= 1'b0;
+            pattern_detected  <= 1'b0;
+            threshold_out     <= THRESHOLD_INIT;
+            calib_count       <= 4'd0;
         end
-        else if (sample_en) begin
-            if (is_anomaly) begin
-                if (anomaly_count < 2'd3)
-                    anomaly_count <= anomaly_count + 1'b1;
-                if (anomaly_count == 2'd2) begin
-                    pattern_detected <= 1'b1;
-                    alarm            <= 1'b1;
+        else begin
+            // Default: limpiar el pulso cada ciclo (fuera de los if)
+            pattern_detected <= 1'b0;
+
+            if (mode_sel && sample_en) begin
+                // Modo calibración
+                if (class_in == 3'd0 && calib_count < CALIB_MAX) begin
+                    threshold_out <= threshold_out - THRESHOLD_STEP;
+                    calib_count   <= calib_count + 1'b1;
                 end
             end
-            else begin
-                anomaly_count <= 2'd0;
-                if (class_in == 3'd0)
-                    alarm <= 1'b0;
+            else if (sample_en) begin
+                if (is_anomaly) begin
+                    if (anomaly_count < 2'd3)
+                        anomaly_count <= anomaly_count + 1'b1;
+                    if (anomaly_count == 2'd2) begin
+                        pattern_detected <= 1'b1;
+                        alarm            <= 1'b1;
+                    end
+                end
+                else begin
+                    anomaly_count <= 2'd0;
+                    if (class_in == 3'd0)
+                        alarm <= 1'b0;
+                end
             end
         end
     end
-end
-
 endmodule

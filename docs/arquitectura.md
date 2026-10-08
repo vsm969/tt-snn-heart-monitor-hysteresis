@@ -143,3 +143,25 @@ The critical path of the module is the chain:
 class_in → is_anomaly → anomaly_count → window_would_be_full → alarm
 
 This path is short, and the design closes timing at 40 MHz with margin in the SKY130A process.
+
+## Formal verification
+
+The `Decision_Engine` was formally verified using SymbiYosys and Z3.
+The formal wrapper is in `src/Decision_Engine_formal.sv` and the
+configuration in `src/decision_engine.sby`.
+
+Three properties are proved for all input combinations within 25 cycles:
+
+1. **Pulse width**: `pattern_detected` is never high two cycles in a row.
+2. **Hysteresis**: the alarm is only cleared by a Normal beat (class 0).
+3. **Reset**: while `rst_n` is low, both `alarm` and `pattern_detected`
+   are 0.
+
+The formal verification caught a real bug in the first version of the
+module: `pattern_detected` could persist for more than one cycle when
+`sample_en` was deasserted right after the third anomaly. The fix
+consisted of moving the default assignment `pattern_detected <= 1'b0;`
+outside the `if (sample_en)` branches, so the pulse auto-clears every
+cycle.
+
+After the fix, the formal proof completes with **PASS** in a few seconds.

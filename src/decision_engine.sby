@@ -1,0 +1,17 @@
+[options]
+mode bmc
+depth 25
+timeout 300
+
+[engines]
+smtbmc z3
+
+[script]
+read -formal -sv Decision_Engine.v
+read -formal -sv Decision_Engine_formal.sv
+prep -top Decision_Engine_formal
+flatten
+
+[files]
+src/Decision_Engine.v
+src/Decision_Engine_formal.sv

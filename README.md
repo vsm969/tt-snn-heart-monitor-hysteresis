@@ -4,7 +4,7 @@ A Tiny Tapeout project that classifies heartbeats using a Spiking Neural Network
 
 [![Tiny Tapeout](https://img.shields.io/badge/Tiny%20Tapeout-ready-blue)](https://tinytapeout.com)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
-[![Tests](https://img.shields.io/badge/tests-3%2F3%20passing-green)](test/)
+[![Tests](https://img.shields.io/badge/tests-9%2F9%20passing-green)](test/)
 
 ---
 
@@ -128,15 +128,45 @@ pip install cocotb
 cd test
 make
 
-Three tests must pass:
+Nine tests must pass:
 
 | Test | What it verifies |
 |---|---|
 | `test_reset_state` | After reset, the alarm and pattern detectors are 0 |
 | `test_hysteresis_3_anomalies` | **Core logic**: 3 consecutive anomalies activate the alarm; a Normal beat clears it |
 | `test_calibration_mode` | Calibration mode does not break the DUT |
+| `test_fusion_does_not_clear_alarm` | The Fusion class (3) does not clear the alarm |
+| `test_more_than_3_anomalies` | 4 or more anomalies keep the alarm active |
+| `test_interrupted_sequence` | A Normal beat between anomalies resets the counter |
+| `test_all_anomaly_classes` | Classes 1, 2, and 4 all count as anomalies |
+| `test_pattern_pulse_width` | `pattern_detected` is a one-cycle pulse |
+| `test_calibration_reduces_threshold` | Calibration actually reduces the internal threshold |
 
-The second test uses the `force_class` mode to bypass the SNN and inject specific classes, allowing direct verification of the `Decision_Engine`.
+Several tests use the `force_class` mode to bypass the SNN and inject specific classes, allowing direct verification of the `Decision_Engine`.
+
+### Formal verification
+
+The `Decision_Engine` was also formally verified using **SymbiYosys** and
+the **Z3** SMT solver. Three properties are mathematically proven for
+all input combinations within a depth of 25 clock cycles:
+
+| Property | What it proves |
+|---|---|
+| Pulse width | `pattern_detected` is never high for two consecutive cycles |
+| Hysteresis | The alarm is only cleared by a Normal (class 0) beat |
+| Reset | While reset is active, `alarm` and `pattern_detected` are 0 |
+
+To reproduce the formal verification:
+
+```bash
+sby --yosys /ucrt64/bin/yosys -f src/decision_engine.sby
+
+The formal verification found a real bug in the first version of the
+Decision_Engine: pattern_detected could stay high for more than one
+cycle if sample_en went low immediately after the third anomaly. The
+bug was fixed and re-verified.
+
+
 
 📁 Project structure
 

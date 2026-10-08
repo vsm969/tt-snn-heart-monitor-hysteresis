@@ -54,12 +54,30 @@ cd test
 make
 ```
 
-The testbench exercises:
+The testbench exercises nine scenarios:
 
 1. **Reset behavior** — verifies alarm and pattern outputs are 0 after reset.
 2. **Hysteresis** — uses `force_class` to inject 3 consecutive Ventricular classifications, verifies the alarm activates, then injects a Normal beat and verifies the alarm clears.
 3. **Calibration mode** — verifies the calibration path does not break the DUT.
+4. **Fusion does not clear alarm** — verifies that class 3 does not clear an active alarm.
+5. **More than 3 anomalies** — verifies the alarm stays active with 4+ consecutive anomalies.
+6. **Interrupted sequence** — verifies the anomaly counter resets when a Normal beat arrives between anomalies.
+7. **All anomaly classes** — verifies classes 1, 2, and 4 all trigger the alarm logic.
+8. **Pattern pulse width** — verifies `pattern_detected` is a single-cycle pulse.
+9. **Calibration reduces threshold** — verifies the calibration mode actually lowers the internal threshold.
 
+```markdown
+### Formal verification
+
+The `Decision_Engine` was formally verified with SymbiYosys + Z3. Three
+properties (pulse width, hysteresis, reset) are proven for all input
+combinations within 25 cycles. The formal flow is available in
+`src/decision_engine.sby`.
+
+The formal verification found a real bug in the first iteration of the
+design: `pattern_detected` could stay high for more than one cycle when
+`sample_en` went low. The fix and the reverification are documented in
+the repository.
 
 Manual testing
 To test with real hardware:
