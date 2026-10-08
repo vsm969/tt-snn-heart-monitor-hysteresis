@@ -180,7 +180,19 @@ async def test_pattern_pulse_width(dut):
 
 @cocotb.test()
 async def test_calibration_reduces_threshold(dut):
-    """La calibración debe reducir el umbral interno."""
+    """La calibración debe reducir el umbral interno.
+    
+    Nota: este test solo corre en simulación RTL, no en gate-level,
+    porque la jerarquía interna (u_decision) se aplana durante la síntesis.
+    """
+    # Detectar si estamos en gate-level
+    # En gate-level, el netlist está aplanado y no existe u_decision
+    try:
+        _ = dut.user_project.u_decision
+    except AttributeError:
+        dut._log.info("Gate-level simulation detected: skipping hierarchical test")
+        return
+
     clock = Clock(dut.clk, CLK_PERIOD_US, unit="us")
     cocotb.start_soon(clock.start())
     await reset_dut(dut)
