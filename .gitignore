@@ -11,3 +11,10 @@ test/sim_build
 test/__pycache__/
 test/results.xml
 test/gate_level_netlist.v
+
+# SymbiYosys working directory
+src/decision_engine/
+
+# Verilator coverage output
+test/obj_dir/
+test/coverage_run.log
