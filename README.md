@@ -218,12 +218,15 @@ The first version of the Decision_Engine had a subtle bug: the alarm was activat
 
 The fix was to evaluate the pattern with the incoming class already included:
 
+```
+
 // Before (buggy): uses stale history
 window_full = is_anomaly(history[0]) && is_anomaly(history[1]) && is_anomaly(history[2]);
 
 // After (correct): includes the incoming class
 window_would_be_full = is_anomaly(class_in) && is_anomaly(history[0]) && is_anomaly(history[1]);
 
+```
 
 This is a classic lesson in synchronous design: when a combinational block feeds a register that is updated at the same clock edge, you must think one cycle ahead.
 
