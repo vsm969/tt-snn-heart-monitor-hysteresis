@@ -128,6 +128,8 @@ pip install cocotb
 cd test
 make
 
+```
+
 Nine tests must pass:
 
 | Test | What it verifies |
@@ -160,6 +162,8 @@ To reproduce the formal verification:
 
 ```bash
 sby --yosys /ucrt64/bin/yosys -f src/decision_engine.sby
+
+```
 
 The formal verification found a real bug in the first version of the
 Decision_Engine: pattern_detected could stay high for more than one
@@ -203,7 +207,7 @@ Synthesis: LibreLane / OpenLane with SKY130A PDK
 
 Tile size: 1x1
 
-Utilization: 79.544%
+Utilization: 81.42%
 
 Clock: 40 MHz (25 ns period)
 
@@ -237,7 +241,7 @@ Reduced cycle_counter in the Heartbeat_Segmenter from 16 to 8 bits.
 
 Used SYNTH_STRATEGY: "AREA 2" and PL_TARGET_DENSITY_PCT: 80 in LibreLane.
 
-Result: utilization went from 133% (did not fit) to 79.5% in 1x1, achieving the objective.
+Result: utilization went from 133% (did not fit) to 81.42% in 1x1, achieving the objective.
 
 📚 Documentation
 Datasheet
