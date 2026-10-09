@@ -173,7 +173,7 @@ bug was fixed and re-verified.
 
 
 📁 Project structure
-
+```
 tt-snn-heart-monitor-hysteresis/
 ├── src/                          # Verilog source files
 │   ├── project.v                 # Top module (Tiny Tapeout wrapper)
@@ -196,7 +196,7 @@ tt-snn-heart-monitor-hysteresis/
 ├── info.yaml                     # Tiny Tapeout metadata
 ├── README.md                     # This file
 └── LICENSE                       # Apache 2.0
-
+```
 🛠️ Design notes 
 Technology and tools
 Language: Verilog
